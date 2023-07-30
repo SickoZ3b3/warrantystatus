@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+            background-image: url('background.jpg'); /* change color to your preference */
+        }
+        #logo {
+            width: 500px;
+            height: 300px;
+            margin: auto;
+        }
+        #manufacturerLogo {
+            margin: auto;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+      $(document).ready(function() {
+        $('#warrantyForm').submit(function(event) {
+          event.preventDefault();
+          var manufacturer = $('#manufacturer').val();
+          var serialNumber = $('#serialNumber').val();
+          var apiKey = 'l78412a897ffb54c5ea9c05efe3be49157';
+          var apiSecret = '298da5801bb94e6999fc8288221d9d2a';
+          var apiUrl = 'https://apigtwb2c.us.dell.com/PROD/sbil/eapi/v5/asset-entitlements';
+          var requestData = {
+            apiKey: apiKey,
+            apiSecret: apiSecret,
+            manufacturer: manufacturer,
+            serialNumber: serialNumber
+          };
+          $.ajax({
+            type: 'POST',
+            url: apiUrl,
+            data: requestData,
+            success: function(response) {
+              // Display response in iframe
+              $('#warrantyIframe').attr('src', 'data:text/html;charset=utf-8,' + encodeURI(response));
+              $('#warrantyIframe').show();
+            },
+            error: function(xhr, status, error) {
+              // Handle error
+              console.log('Error: ' + error);
+            }
+          });
+        });
+      });
+    </script>
+    <script>
+        function changeLogo() {
+            var manufacturer = document.getElementById('manufacturer').value;
+            var logoElement = document.getElementById('manufacturerLogo');
+            logoElement.src = manufacturer + '.png';
+            if (manufacturer === "apple") {
+                logoElement.style.width = "100px";
+                logoElement.style.height = "120px";
+            } else {
+                logoElement.style.width = "230px";
+                logoElement.style.height = "100px";
+            }
+            if (manufacturer != "default") {
+                logoElement.classList.remove("hidden");
+                document.getElementById('deviceInput').style.display = 'block';
+            } else {
+                logoElement.classList.add("hidden");
+                document.getElementById('deviceInput').style.display = 'none';
+            }
+        }
+
+        function checkWarranty() {
+            var device = document.getElementById('device').value;
+            var serial = document.getElementById('serial').value;
+            if (device && serial) {
+                document.getElementById('status').innerHTML = "Your " + device + "'s Warranty Status: <b>Expired</b>";
+            } else {
+                document.getElementById('status').innerHTML = "Please enter device model and serial number.";
+            }
+        }
+
+        function renew() {
+            document.getElementById('status').innerHTML = "Your Device has been <b>Renewed Successfully</b>";
+        }
+
+        function reset() {
+            document.getElementById('status').innerHTML = "";
+            document.getElementById('device').value = "";
+            document.getElementById('serial').value = "";
+            document.getElementById('manufacturer').value = "default";
+            var logoElement = document.getElementById('manufacturerLogo');
+            logoElement.src = '';
+            logoElement.classList.add("hidden");
+            logoElement.style.width = "";
+            logoElement.style.height = "";
+            document.getElementById('deviceInput').style.display = 'none';
+        }
+    </script>
+</head>
+<body>
+    <img id="logo" src="warrantystatus.tech.png" />
+    <h1>Check Your Warranty</h1>
+    <select id="manufacturer" onchange="changeLogo()">
+        <option value="default">Select Manufacturer</option>
+        <option value="apple">Apple</option>
+        <option value="samsung">Samsung</option>
+        <option value="Dell">Dell</option>
+    </select>
+    <img id="manufacturerLogo" class="hidden" />
+    <div id="deviceInput" class="hidden">
+        <br />
+        <input type="text" id="device" placeholder="Enter device model" />
+        <br />
+        <input type="text" id="serial" placeholder="Enter serial number" />
+        <br />
+        <button onclick="checkWarranty()">Submit</button>
+        <button onclick="renew()">Renew</button>
+        <button onclick="reset()">Check Another Device</button>
+    </div>
+    <div id="status"></div>
+</body>
+</html>
